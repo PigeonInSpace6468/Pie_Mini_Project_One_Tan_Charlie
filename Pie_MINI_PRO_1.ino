@@ -1,71 +1,88 @@
+const int red_led = 11;
+const int yellow_led = 12;
+const int green_led = 13;
+const int button = 10;
+bool button_down;
+int count = 0;
+
 void setup() {
   // initialize digital pin LED_BUILTIN as an output.
-  pinMode(13, OUTPUT);
-  pinMode(12, OUTPUT);
-  pinMode(11, OUTPUT);
-  count = 0
+  pinMode(green_led, OUTPUT);
+  pinMode(yellow_led, OUTPUT);
+  pinMode(red_led, OUTPUT);
+  pinMode(button, INPUT);
+
 }
 
 void loop() {
+  if (digitalRead(button) == LOW && button_down == false){
+    button_down = true;
+    count = count +1;
+    Serial.println(count);
+  }
+  else if (digitalRead(button) == HIGH){
+    button_down = false;
+  }
   // put your main code here, to run repeatedly:
   if (count >= 5) {
-      count = 0
+      count = 0;
   }
   else if (count == 0) {
-    digitalWrite(11, LOW);
-    digitalWrite(12, LOW);
-    digitalWrite(13, LOW);
+    digitalWrite(red_led, LOW);
+    digitalWrite(yellow_led, LOW);
+    digitalWrite(green_led, LOW);
   }
   else if (count == 1) {
-    digitalWrite(13, HIGH);  // change state of the LED by setting the pin to the HIGH voltage level
+    digitalWrite(green_led, HIGH);  // change state of the LED by setting the pin to the HIGH voltage level
 
-    digitalWrite(11, HIGH);   // change state of the LED by setting the pin to the LOW voltage level
+    digitalWrite(red_led, HIGH);   // change state of the LED by setting the pin to the LOW voltage level
 
-    digitalWrite(12, HIGH);
+    digitalWrite(yellow_led, HIGH);
 
     delay(1000);
 
-    digitalWrite(12, LOW);
+    digitalWrite(yellow_led, LOW);
 
-    digitalWrite(13, LOW);
+    digitalWrite(green_led, LOW);
     
-    digitalWrite(11, LOW);
+    digitalWrite(red_led, LOW);
+
+    delay(1000);
     
     }
-  }
   else if (count == 2) {
-    digitalWrite(13, HIGH);  // change state of the LED by setting the pin to the HIGH voltage level
+    digitalWrite(green_led, HIGH);  // change state of the LED by setting the pin to the HIGH voltage level
 
-    digitalWrite(11, HIGH);   // change state of the LED by setting the pin to the LOW voltage level
+    digitalWrite(red_led, HIGH);   // change state of the LED by setting the pin to the LOW voltage level
 
-    digitalWrite(12, HIGH);
+    digitalWrite(yellow_led, HIGH);
   }
   else if (count == 3){
-    digitalWrite(13, HIGH);  // change state of the LED by setting the pin to the HIGH voltage level
+    digitalWrite(green_led, HIGH);  // change state of the LED by setting the pin to the HIGH voltage level
     delay(500);                      // wait for a second
-    digitalWrite(13, LOW);   // change state of the LED by setting the pin to the LOW voltage level
+    digitalWrite(green_led, LOW);   // change state of the LED by setting the pin to the LOW voltage level
     delay(500);                      // wait for a second
-    digitalWrite(12, HIGH);
+    digitalWrite(yellow_led, HIGH);
     delay(500);
-    digitalWrite(12, LOW);
+    digitalWrite(yellow_led, LOW);
     delay(500);
-    digitalWrite(11, HIGH);
+    digitalWrite(red_led, HIGH);
     delay(500);
-    digitalWrite(11, LOW);
+    digitalWrite(red_led, LOW);
     delay(500);
   }
   else if (count == 4){
-    digitalWrite(13, HIGH);   // change state of the LED by setting the pin to the LOW voltage level
+    digitalWrite(green_led, HIGH);   // change state of the LED by setting the pin to the LOW voltage level
     delay(500);
-    digitalWrite(12, HIGH);
-    digitalWrite(13, LOW);   // change state of the LED by setting the pin to the LOW voltage level
+    digitalWrite(yellow_led, HIGH);
+    digitalWrite(green_led, LOW);   // change state of the LED by setting the pin to the LOW voltage level
     delay(500);
-    digitalWrite(13, HIGH);   // change state of the LED by setting the pin to the LOW voltage level
-    digitalWrite(12, LOW);   // change state of the LED by setting the pin to the LOW voltage level
+    digitalWrite(green_led, HIGH);   // change state of the LED by setting the pin to the LOW voltage level
+    digitalWrite(yellow_led, LOW);   // change state of the LED by setting the pin to the LOW voltage level
     delay(500);
-    digitalWrite(11, LOW);   // change state of the LED by setting the pin to the LOW voltage level
+    digitalWrite(red_led, LOW);   // change state of the LED by setting the pin to the LOW voltage level
     delay(500);
-    digitalWrite(13, LOW);   // change state of the LED by setting the pin to the LOW voltage level
+    digitalWrite(green_led, LOW);   // change state of the LED by setting the pin to the LOW voltage level
     delay(500);                            
   }
 
