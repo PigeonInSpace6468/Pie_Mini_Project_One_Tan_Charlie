@@ -5,22 +5,33 @@ const int button = 10;
 bool button_down;
 int count = 0;
 
+uint32_t blink_time;
+
+const int interval = 500;
+
 void setup() {
   // initialize digital pin LED_BUILTIN as an output.
   pinMode(green_led, OUTPUT);
   pinMode(yellow_led, OUTPUT);
   pinMode(red_led, OUTPUT);
   pinMode(button, INPUT);
-
+  blink_time = millis();
+  count = 0;
+  Serial.begin(9600);
 }
 
+
+
 void loop() {
-  if (digitalRead(button) == LOW && button_down == false){
+  uint32_t t;
+  t = millis();
+  //Serial.println(t);
+  if (digitalRead(button) == HIGH && button_down == false){
     button_down = true;
     count = count +1;
     Serial.println(count);
   }
-  else if (digitalRead(button) == HIGH){
+  else if (digitalRead(button) == LOW){
     button_down = false;
   }
   // put your main code here, to run repeatedly:
@@ -33,22 +44,23 @@ void loop() {
     digitalWrite(green_led, LOW);
   }
   else if (count == 1) {
+    /*
     digitalWrite(green_led, HIGH);  // change state of the LED by setting the pin to the HIGH voltage level
-
     digitalWrite(red_led, HIGH);   // change state of the LED by setting the pin to the LOW voltage level
-
     digitalWrite(yellow_led, HIGH);
-
     delay(1000);
-
     digitalWrite(yellow_led, LOW);
-
     digitalWrite(green_led, LOW);
-    
     digitalWrite(red_led, LOW);
-
     delay(1000);
-    
+    */
+      if (t >= blink_time + interval){
+        digitalWrite(yellow_led, !digitalRead(yellow_led));
+        digitalWrite(green_led, !digitalRead(green_led));
+        digitalWrite(red_led, !digitalRead(red_led));
+        blink_time = t;
+      }
+
     }
   else if (count == 2) {
     digitalWrite(green_led, HIGH);  // change state of the LED by setting the pin to the HIGH voltage level
