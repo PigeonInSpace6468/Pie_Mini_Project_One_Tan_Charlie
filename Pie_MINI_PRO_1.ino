@@ -110,12 +110,12 @@ void loop() {
     delay(500);   
     */
     bool broken = false;
-    int num = 0
+    int num = 0;
     while (broken == false){
       if (digitalRead(button) == HIGH && button_down == false){
           button_down = true;
           count = count +1;
-          broken == true
+          broken == true;
           Serial.println(count);
       }
       else if (digitalRead(button) == LOW){
@@ -124,25 +124,56 @@ void loop() {
       }
       
       if (t >= blink_time + interval){
-      //digitalWrite(lights[lightnum], !lights[lightnum]);
-      /*if (num >= 4){
-          digitalWrite(red_led, HIGH);
+        //digitalWrite(lights[lightnum], !lights[lightnum]);
+        /*if (num >= 4){
+            digitalWrite(red_led, HIGH);
+          }
+          else {
+            digitalWrite(red_led, LOW);
+          }
+        */
+        if (num == 0 || num>= 8){
+          for (int led : lights){
+            digitalWrite(led, LOW);
+          }
+          num = 1;
+          continue;
         }
-        else {
-          digitalWrite(red_led, LOW);
-        }
-      */
-      if (num == 0 || num>= 8){
-        for (int led : lights){
-          digitalWrite(led, LOW);
-        }
-        num = 1
-        continue
-      }
-      
+        if (num == 1){
+          digitalWrite(green_led, HIGH);
+          num = num+1;
 
-        
+        }
+        if (num == 2){
+          digitalWrite(green_led, LOW);
+          digitalWrite(yellow_led, HIGH);
+          num = num+1;
+        }
+        if (num == 3){
+          digitalWrite(green_led, HIGH);
+          num = num+1;
+        }
+        if (num == 4){
+          for (int led : lights){
+            digitalWrite(led, LOW);
+          }
+          digitalWrite(red_led, HIGH);
+          num = num+1;
+        }
+        if (num == 5){
+          digitalWrite(green_led, HIGH);
+          num = num+1;
+        }
+        if (num == 6){
+          digitalWrite(green_led, LOW);
+          digitalWrite(yellow_led, HIGH);
+          num = num+1;
+        }
+        if (num == 7){
+          digitalWrite(green_led, HIGH);
+          num = num+1;
+        }
+      }
     }                       
   }
-
 }
