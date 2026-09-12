@@ -44,7 +44,7 @@ void setup() {
 // intilizes loop
 void loop() {
   unsigned long now = millis(); // intilizes another time from when we merged code
-  int interval = analogRead(potPin); // 0-1024 Reads the potionameter
+  int interval = analogRead(potPin); // 0-1024 Reads the potionameter and sets the time interval based off it
   // Button debounce 
   bool buttonReading = digitalRead(button); // Checks button postion 
   if (buttonReading != lastButtonReading) { // Checks if the button is infact in a diffrent then last time
