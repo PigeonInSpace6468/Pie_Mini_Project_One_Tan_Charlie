@@ -1,126 +1,194 @@
+// Turn signals (LEDs)
 const int red_led = 11;
-const int yellow_led = 12;
-const int green_led = 13;
+const int yellow_led = 13;
+const int green_led = 12;
+
+// Turn signal modes (button)
 const int button = 10;
 
-// Things to debounce button
-bool lastButtonReading; // HIGH = released, LOW = pressed
-unsigned long lastButtonChange = 0;
-const int buttonDebounce = 50;
-bool buttonState = HIGH;
+// Turn signal flash speed (potentiometer)
+int potentiometer = A0;
 
-int count = 0;
 
-uint32_t blink_time;
+// Button debounce
+bool lastButtonReading;          // HIGH = pressed, LOW = unpressed/released
+uint32_t lastButtonChange = 0;   // The last time the button reading changed
+const int buttonDebounce = 50;   // Button reading must remain stable for >= 50 ms
+bool buttonState = LOW;          // Initial buttons state
 
-const int interval = 500;
+int mode = 0;                   // Keeps track of the current turn signal mode
+int binary_state = 0;            // Used for binary blinking mode; keeps track of binary state
+uint32_t blink_time;             // Timer for LED blinking
+uint32_t blink_interval = 0;     // Period between blinks - determines frequency
+
+int lights[3] = {red_led, yellow_led, green_led}; // Used for sequential blinking mode
+int light_num = 0; // Used for looping through lights
+
 
 void setup() {
   Serial.begin(9600);
   
-  // initialize digital pin LED_BUILTIN as an output.
+  // Initialize LEDs as outputs
   pinMode(green_led, OUTPUT);
   pinMode(yellow_led, OUTPUT);
   pinMode(red_led, OUTPUT);
-  pinMode(button, INPUT_PULLUP);
-  blink_time = millis();
-  count = 0;
 
-  lastButtonReading = digitalRead(button);
-  Serial.print("Initial reading: ");
-  Serial.println(lastButtonReading);
+  // Initialize button as input
+  pinMode(button, INPUT);
+  blink_time = millis(); // Start blink timer
+  lastButtonReading = digitalRead(button); // Record initial button reading
+
+  Serial.print("Initial reading: "); // For testing: confirm button reading
+  Serial.println(lastButtonReading); 
 }
 
 
 void loop() {
-  unsigned long now = millis();
-  
+  unsigned long now = millis(); // Current program time
+  blink_interval = analogRead(potentiometer); // Raw analog reading: 0-1024
+
   // Button debounce 
-  bool buttonReading = digitalRead(button);
-  if (buttonReading != lastButtonReading) {
-    lastButtonChange = now;              // reset debounce timer
-    lastButtonReading = buttonReading;   // record last reading
+  bool buttonReading = digitalRead(button); // Records button reading 
+
+  if (buttonReading != lastButtonReading) { // Checks if button reading is unstable (changing)
+    lastButtonChange = now;                 // Reset debounce timer
+    lastButtonReading = buttonReading;      // Update last button reading
   }
 
   // Check if button reading has been stable for long enough
   if (now - lastButtonChange >= buttonDebounce) {
+
     if (buttonState != buttonReading) {
-      buttonState = buttonReading; // accept new button state
-      if (buttonState == LOW) {
-        count++;
-        Serial.println("Button pressed");
+      buttonState = buttonReading; // Accept stable button state
+      
+      if (buttonState == HIGH) {
+        mode++; // Increment to new mode
+
+        Serial.println("Button pressed"); // For testing: confirm button pressed
         Serial.print("Current mode: ");
-        Serial.println(count);
-      }
-      else {
-        //Serial.println("Button released");
+        Serial.println(mode);
       }
     }
   }
 
-  // put your main code here, to run repeatedly:
-  if (count >= 5) {
-      count = 0;
+  // Reset after final mode
+  if (mode >= 5) {
+    mode = 0; 
   }
-  
-  else if (count == 0) {
-    digitalWrite(red_led, LOW);
-    digitalWrite(yellow_led, LOW);
-    digitalWrite(green_led, LOW);
-  }
-  else if (count == 1) {
-    
-    digitalWrite(green_led, HIGH);  // change state of the LED by setting the pin to the HIGH voltage level
-    digitalWrite(red_led, HIGH);   // change state of the LED by setting the pin to the LOW voltage level
-    digitalWrite(yellow_led, HIGH);
-    delay(1000);
-    digitalWrite(yellow_led, LOW);
-    digitalWrite(green_led, LOW);
-    digitalWrite(red_led, LOW);
-    delay(1000);
-    
-      if (t >= blink_time + interval){
-        digitalWrite(yellow_led, !digitalRead(yellow_led));
-        digitalWrite(green_led, !digitalRead(green_led));
-        digitalWrite(red_led, !digitalRead(red_led));
-        blink_time = t;
-      }
 
+  // Mode 0: All off
+  else if (mode == 0) {
+    digitalWrite(red_led, LOW);
+    digitalWrite(yellow_led, LOW);
+    digitalWrite(green_led, LOW);
+  }
+
+  // Mode 1: All blinking
+  else if (mode == 1) { 
+    
+    // Checks if enough time has passed before the last blink
+    if (now >= blink_time + interval) { 
+      digitalWrite(yellow_led, !digitalRead(yellow_led)); // Invert LED state
+      digitalWrite(green_led, !digitalRead(green_led));
+      digitalWrite(red_led, !digitalRead(red_led));
+
+      blink_time = now; // Record the last blink time
     }
-  else if (count == 2) {
-    digitalWrite(green_led, HIGH);  // change state of the LED by setting the pin to the HIGH voltage level
-
-    digitalWrite(red_led, HIGH);   // change state of the LED by setting the pin to the LOW voltage level
-
-    digitalWrite(yellow_led, HIGH);
   }
-  else if (count == 3){
-    digitalWrite(green_led, HIGH);  // change state of the LED by setting the pin to the HIGH voltage level
-    delay(500);                      // wait for a second
-    digitalWrite(green_led, LOW);   // change state of the LED by setting the pin to the LOW voltage level
-    delay(500);                      // wait for a second
-    digitalWrite(yellow_led, HIGH);
-    delay(500);
-    digitalWrite(yellow_led, LOW);
-    delay(500);
+
+  // Mode 2: All on
+  else if (mode == 2) {
+    digitalWrite(green_led, HIGH);
     digitalWrite(red_led, HIGH);
-    delay(500);
-    digitalWrite(red_led, LOW);
-    delay(500);
-  }
-  else if (count == 4){
-    digitalWrite(green_led, HIGH);   // change state of the LED by setting the pin to the LOW voltage level
-    delay(500);
     digitalWrite(yellow_led, HIGH);
-    digitalWrite(green_led, LOW);   // change state of the LED by setting the pin to the LOW voltage level
-    delay(500);
-    digitalWrite(green_led, HIGH);   // change state of the LED by setting the pin to the LOW voltage level
-    digitalWrite(yellow_led, LOW);   // change state of the LED by setting the pin to the LOW voltage level
-    delay(500);
-    digitalWrite(red_led, LOW);   // change state of the LED by setting the pin to the LOW voltage level
-    delay(500);
-    digitalWrite(green_led, LOW);   // change state of the LED by setting the pin to the LOW voltage level
-    delay(500);                            
   }
-  
+
+  // Mode 3: Sequential blinking
+  else if (mode == 3){
+
+    // Checks if enough time has passed before the last blink
+    if (now >= blink_time + interval) {
+      digitalWrite(green_led, LOW);
+      digitalWrite(yellow_led, LOW);
+      digitalWrite(red_led, LOW);
+
+      digitalWrite(lights[light_num], HIGH); // Set first LED in the blink cycle HIGH
+      light_num = light_num + 1; // Increment to next LED
+      
+      // Reset LED counter
+      if (light_num >= 3) { 
+        light_num = 0;
+      }
+
+      blink_time = now; // Record the last blink time
+    }
+  }
+
+  // Mode 4: Binary blinking
+  else if (mode == 4){
+
+      // Checks if enough time has passed before the last blink
+      if (now >= blink_time + interval){
+
+        // [R][G][B] = [0][0][0]
+        if (binary_state == 0) { 
+          for (int led : lights){
+            digitalWrite(led, LOW);
+          }
+          binary_state = binary_state + 1;
+        }
+
+        // [R][G][B] = [1][1][1]
+        else if (binary_state == 7) {
+          digitalWrite(green_led, HIGH);
+          binary_state = 0; // Return to first binary state
+        }
+
+        // [R][G][B] = [1][1][0]
+        else if (binary_state == 6) {
+          digitalWrite(green_led, LOW);
+          digitalWrite(yellow_led, HIGH);
+          binary_state = binary_state + 1;
+        }
+
+        // [R][G][B] = [1][0][1]
+        else if (binary_state == 5) {
+          digitalWrite(green_led, HIGH);
+          binary_state = binary_state + 1;
+        }
+
+        // [R][G][B] = [1][0][0]
+        else if (binary_state == 4) {
+          for (int led : lights){
+            digitalWrite(led, LOW);
+          }
+          digitalWrite(red_led, HIGH);
+          binary_state = binary_state + 1;
+        }
+
+        // [R][G][B] = [0][1][1]
+        else if (binary_state == 3) {
+          digitalWrite(green_led, HIGH);
+          binary_state = binary_state + 1;
+        }
+
+        // [R][G][B] = [0][1][0]
+        else if (binary_state == 2) { 
+          digitalWrite(green_led, LOW);
+          digitalWrite(yellow_led, HIGH);
+          binary_state = binary_state + 1;
+        }
+
+        // [R][G][B] = [0][0][1]
+        else if (binary_state == 1) {
+          digitalWrite(green_led, HIGH);
+          binary_state = binary_state + 1;
+        }
+        
+        blink_time = now; // Record the last blink time
+        Serial.println(binary_state); // For testing: print current step in binary cycle
+    }                       
+  }
+
+  // End of loop()
 }
