@@ -16,9 +16,9 @@ uint32_t lastButtonChange = 0;   // The last time the button reading changed
 const int buttonDebounce = 50;   // Button reading must remain stable for >= 50 ms
 bool buttonState = LOW;          // Initial buttons state
 
-int mode = 0;                   // Keeps track of the current turn signal mode
+int mode = 0;                    // Keeps track of the current turn signal mode
 int binary_state = 0;            // Used for binary blinking mode; keeps track of binary state
-uint32_t blink_time;             // Timer for LED blinking
+uint32_t last_blink_time;        // Records the last LED blink
 uint32_t blink_interval = 0;     // Period between blinks - determines frequency
 
 int lights[3] = {red_led, yellow_led, green_led}; // Used for sequential blinking mode
@@ -35,7 +35,7 @@ void setup() {
 
   // Initialize button as input
   pinMode(button, INPUT);
-  blink_time = millis(); // Start blink timer
+  last_blink_time = millis(); // Start blink timer
   lastButtonReading = digitalRead(button); // Record initial button reading
 
   Serial.print("Initial reading: "); // For testing: confirm button reading
@@ -87,12 +87,12 @@ void loop() {
   else if (mode == 1) { 
     
     // Checks if enough time has passed before the last blink
-    if (now >= blink_time + interval) { 
+    if (now >= last_blink_time + blink_interval) { 
       digitalWrite(yellow_led, !digitalRead(yellow_led)); // Invert LED state
       digitalWrite(green_led, !digitalRead(green_led));
       digitalWrite(red_led, !digitalRead(red_led));
 
-      blink_time = now; // Record the last blink time
+      last_blink_time = now; // Record the last blink time
     }
   }
 
@@ -104,10 +104,10 @@ void loop() {
   }
 
   // Mode 3: Sequential blinking
-  else if (mode == 3){
+  else if (mode == 3) {
 
     // Checks if enough time has passed before the last blink
-    if (now >= blink_time + interval) {
+    if (now >= last_blink_time + blink_interval) {
       digitalWrite(green_led, LOW);
       digitalWrite(yellow_led, LOW);
       digitalWrite(red_led, LOW);
@@ -120,15 +120,15 @@ void loop() {
         light_num = 0;
       }
 
-      blink_time = now; // Record the last blink time
+      last_blink_time = now; // Record the last blink time
     }
   }
 
   // Mode 4: Binary blinking
-  else if (mode == 4){
+  else if (mode == 4) {
 
       // Checks if enough time has passed before the last blink
-      if (now >= blink_time + interval){
+      if (now >= last_blink_time + blink_interval){
 
         // [R][G][B] = [0][0][0]
         if (binary_state == 0) { 
@@ -185,7 +185,7 @@ void loop() {
           binary_state = binary_state + 1;
         }
         
-        blink_time = now; // Record the last blink time
+        last_blink_time = now; // Record the last blink time
         Serial.println(binary_state); // For testing: print current step in binary cycle
     }                       
   }
